@@ -6,7 +6,7 @@ def get_main_keyboard():
         ['📝 Добавить задачу', '📋 Мои задачи'],
         ['🔴 Важные задачи', '⏰ Срочные задачи'],
         ['✅ Завершить задачу', '🔎 Описание'],
-        ['✏️ Редактировать описание']
+        ['✏️ Редактировать задачу']
     ]
     return ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
 
@@ -39,3 +39,14 @@ def get_confirmation_keyboard():
         ]
     ]
     return InlineKeyboardMarkup(keyboard)
+
+
+def get_edit_fields_keyboard():
+    """Клавиатура выбора поля для редактирования"""
+    keyboard = [
+        ['Заголовок', 'Приоритет'],
+        ['Дедлайн', 'Описание'],
+        ['Отметить выполненной', 'Завершить редактирование'],
+        ['Отмена']
+    ]
+    return ReplyKeyboardMarkup(keyboard, resize_keyboard=True, one_time_keyboard=True)

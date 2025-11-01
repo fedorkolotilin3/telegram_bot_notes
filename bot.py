@@ -14,7 +14,7 @@ from handlers.tasks import (
 from handlers.conversation import get_conversation_handler
 from utils.keyboards import get_main_keyboard
 from services.scheduler import NotificationScheduler, scheduler_instance
-from handlers.tasks import get_description_conversation, get_edit_description_conversation
+from handlers.tasks import get_description_conversation, get_edit_description_conversation, get_general_edit_conversation
 
 # Настройка логирования
 logging.basicConfig(
@@ -39,6 +39,9 @@ class TaskManagerBot:
         self.application.add_handler(get_conversation_handler())
         # ConversationHandlers для просмотра/редактирования описаний задач
         self.application.add_handler(get_description_conversation())
+        # general edit (replaces separate edit-description option)
+        self.application.add_handler(get_general_edit_conversation())
+        # keep legacy edit-description handler for backward compatibility
         self.application.add_handler(get_edit_description_conversation())
         
         # Регистрация обработчиков сообщений (кнопки меню)

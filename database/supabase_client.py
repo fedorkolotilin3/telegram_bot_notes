@@ -47,6 +47,21 @@ class SupabaseClient:
         except Exception as e:
             logger.error(f"Error updating task description: {e}")
             return False
+    
+    def update_task(self, task_id: int, user_id: int, fields: dict) -> bool:
+        """Обновление произвольных полей задачи. fields - словарь колонка->значение"""
+        if not fields:
+            return False
+        try:
+            response = self.client.table('tasks')\
+                .update(fields)\
+                .eq('id', task_id)\
+                .eq('user_id', user_id)\
+                .execute()
+            return len(response.data) > 0
+        except Exception as e:
+            logger.error(f"Error updating task fields: {e}")
+            return False
 
     def get_task_by_name(self, user_id: int, name: str) -> dict:
         """Поиск задачи по части названия (case-insensitive) - возвращает первую подходящую"""
