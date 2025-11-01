@@ -1,7 +1,7 @@
 from telegram import Update
 from telegram.ext import ContextTypes, ConversationHandler, CommandHandler, MessageHandler, filters
 from database.supabase_client import db
-from utils.keyboards import get_tasks_keyboard, get_main_keyboard, get_edit_fields_keyboard, get_priority_keyboard
+from utils.keyboards import get_tasks_keyboard, get_main_keyboard, get_edit_fields_keyboard, get_priority_keyboard, get_completed_tasks_keyboard
 from datetime import datetime
 
 # States for description-related conversations
@@ -422,3 +422,45 @@ def get_general_edit_conversation():
         },
         fallbacks=[MessageHandler(filters.Regex('^(Отмена|/cancel)$'), lambda u, c: ConversationHandler.END)]
     )
+
+
+async def show_completed_tasks(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Показать список выполненных задач пользователя для возможного восстановления"""
+    user_id = update.effective_user.id
+    # get tasks marked done
+    tasks = db.get_tasks(user_id, done=True)
+
+    if not tasks:
+        await update.message.reply_text(
+            "✅ У вас нет выполненных задач для восстановления!",
+            reply_markup=get_main_keyboard()
+        )
+        return
+
+    keyboard = get_completed_tasks_keyboard(tasks)
+    await update.message.reply_text(
+        "♻️ Выберите задачу для восстановления:",
+        reply_markup=keyboard
+    )
+
+
+async def handle_task_restore(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Обработка нажатия на кнопку восстановления задачи"""
+    query = update.callback_query
+    await query.answer()
+
+    task_id = int(query.data.split('_')[1])
+    user_id = query.from_user.id
+
+    success = db.restore_task(task_id, user_id)
+
+    if success:
+        await query.edit_message_text(
+            "✅ Задача успешно восстановлена!",
+            reply_markup=get_main_keyboard()
+        )
+    else:
+        await query.edit_message_text(
+            "❌ Ошибка при восстановлении задачи",
+            reply_markup=get_main_keyboard()
+        )

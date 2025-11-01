@@ -11,6 +11,7 @@ from handlers.tasks import (
     show_tasks_for_completion,
     handle_task_completion
 )
+from handlers.tasks import show_completed_tasks, handle_task_restore
 from handlers.conversation import get_conversation_handler
 from utils.keyboards import get_main_keyboard
 from services.scheduler import NotificationScheduler, scheduler_instance
@@ -49,9 +50,11 @@ class TaskManagerBot:
         self.application.add_handler(MessageHandler(filters.Regex('^(🔴 Важные задачи)$'), show_important_tasks))
         self.application.add_handler(MessageHandler(filters.Regex('^(⏰ Срочные задачи)$'), show_urgent_tasks))
         self.application.add_handler(MessageHandler(filters.Regex('^(✅ Завершить задачу)$'), show_tasks_for_completion))
+        self.application.add_handler(MessageHandler(filters.Regex('^(♻️ Восстановить задачу)$'), show_completed_tasks))
         
         # Регистрация обработчиков inline кнопок
         self.application.add_handler(CallbackQueryHandler(handle_task_completion, pattern='^done_'))
+        self.application.add_handler(CallbackQueryHandler(handle_task_restore, pattern='^restore_'))
         
         # Обработчик для неизвестных команд
         self.application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, self.unknown_command))

@@ -6,7 +6,7 @@ def get_main_keyboard():
         ['📝 Добавить задачу', '📋 Мои задачи'],
         ['🔴 Важные задачи', '⏰ Срочные задачи'],
         ['✅ Завершить задачу', '🔎 Описание'],
-        ['✏️ Редактировать задачу']
+        ['✏️ Редактировать задачу', '♻️ Восстановить задачу']
     ]
     return ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
 
@@ -50,3 +50,17 @@ def get_edit_fields_keyboard():
         ['Отмена']
     ]
     return ReplyKeyboardMarkup(keyboard, resize_keyboard=True, one_time_keyboard=True)
+
+
+def get_completed_tasks_keyboard(tasks):
+    """Inline клавиатура для списка выполненных задач (для восстановления)"""
+    keyboard = []
+    for task in tasks:
+        task_text = task['task'][:30] + "..." if len(task['task']) > 30 else task['task']
+        keyboard.append([
+            InlineKeyboardButton(
+                f"♻️ {task_text}",
+                callback_data=f"restore_{task['id']}"
+            )
+        ])
+    return InlineKeyboardMarkup(keyboard)

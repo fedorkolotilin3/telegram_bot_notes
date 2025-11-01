@@ -69,6 +69,7 @@ class SupabaseClient:
             response = self.client.table('tasks')\
                 .select('*')\
                 .eq('user_id', user_id)\
+                .eq('is_done', False)\
                 .ilike('task', f"%{name}%")\
                 .order('created_at', desc=True)\
                 .execute()
@@ -138,6 +139,19 @@ class SupabaseClient:
         except Exception as e:
             logger.error(f"Error marking task as done: {e}")
             return False
+
+    def restore_task(self, task_id: int, user_id: int) -> bool:
+        """Восстановить задачу (снять отметку выполнено)"""
+        try:
+            response = self.client.table('tasks')\
+                .update({'is_done': False})\
+                .eq('id', task_id)\
+                .eq('user_id', user_id)\
+                .execute()
+            return len(response.data) > 0
+        except Exception as e:
+            logger.error(f"Error restoring task: {e}")
+            return False
     
     def delete_task(self, task_id: int, user_id: int) -> bool:
         """Удаление задачи"""
@@ -159,6 +173,7 @@ class SupabaseClient:
                 .select('*')\
                 .eq('id', task_id)\
                 .eq('user_id', user_id)\
+                .eq('is_done', False)\
                 .execute()
             return response.data[0] if response.data else None
         except Exception as e:
