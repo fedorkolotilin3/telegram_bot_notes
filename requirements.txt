@@ -1,0 +1,7 @@
+python-telegram-bot==21.0
+python-dotenv==1.2.1
+supabase==2.4.6
+gotrue==2.9.1
+python-dateutil==2.9.0.post0
+pytz==2025.2
+apscheduler==3.10.1
