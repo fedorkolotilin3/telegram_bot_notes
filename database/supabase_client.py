@@ -15,25 +15,36 @@ class SupabaseClient:
             logger.error(f"Error initializing Supabase client: {e}")
             raise
     
-    def add_task(self, user_id: int, task: str, priority: str = "medium", deadline: str = None) -> dict:
-        """Добавление новой задачи"""
+    def add_task(self, user_id, task, priority='medium', deadline=None, description=None):
+        """
+        Добавить задачу. Теперь поддерживает описание (description).
+        deadline ожидается как строка ISO date или ISO datetime (например "2025-11-05" или "2025-11-05T14:30:00").
+        """
+        payload = {
+            'user_id': user_id,
+            'task': task,
+            'priority': priority,
+            'deadline': deadline,
+            'is_done': False,
+        }
+        if description is not None:
+            payload['description'] = description
+
         try:
-            task_data = {
-                "user_id": user_id,
-                "task": task,
-                # supporting an optional detailed description
-                "description": None,
-                "priority": priority,
-                "deadline": deadline,
-                "is_done": False,
-                "created_at": datetime.utcnow().isoformat()
-            }
-            
-            response = self.client.table('tasks').insert(task_data).execute()
-            return response.data[0] if response.data else None
+            res = self.client.table('tasks').insert(payload).execute()
+            # Возвращаем вставленную запись (в зависимости от клиента)
+            if hasattr(res, 'data'):
+                # supabase-py возвращает .data как список
+                if isinstance(res.data, list) and res.data:
+                    return res.data[0]
+                return res.data
         except Exception as e:
-            logger.error(f"Error adding task: {e}")
-            return None
+            # логирование если есть logger в модуле, иначе проигнорировать или вывести
+            try:
+                logger.exception("Error adding task: %s", e)
+            except NameError:
+                pass
+        return None
 
     def update_task_description(self, task_id: int, user_id: int, description: str) -> bool:
         """Обновление подробного описания задачи"""

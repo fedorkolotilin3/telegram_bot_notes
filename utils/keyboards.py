@@ -17,6 +17,28 @@ def get_priority_keyboard():
     ]
     return ReplyKeyboardMarkup(keyboard, resize_keyboard=True, one_time_keyboard=True)
 
+
+def get_cancel_keyboard():
+    """Клавиатура с кнопкой Отмена"""
+    keyboard = [['Отмена']]
+    return ReplyKeyboardMarkup(keyboard, resize_keyboard=True, one_time_keyboard=True)
+
+
+def get_skip_or_cancel_keyboard():
+    """Клавиатура с кнопками Пропустить и Отмена"""
+    keyboard = [['Пропустить', 'Отмена']]
+    return ReplyKeyboardMarkup(keyboard, resize_keyboard=True, one_time_keyboard=True)
+
+
+def get_deadline_quick_keyboard():
+    """Клавиатура для быстрого выбора дедлайна"""
+    keyboard = [
+        ['Сегодня', 'Завтра', 'Через 3 дня'],
+        ['Выбрать дату', 'Пропустить'],
+        ['Отмена']
+    ]
+    return ReplyKeyboardMarkup(keyboard, resize_keyboard=True, one_time_keyboard=True)
+
 def get_tasks_keyboard(tasks):
     """Inline клавиатура для списка задач"""
     keyboard = []

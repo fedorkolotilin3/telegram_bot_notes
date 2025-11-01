@@ -3,6 +3,8 @@ from telegram.ext import ContextTypes, ConversationHandler, CommandHandler, Mess
 from database.supabase_client import db
 from utils.keyboards import get_tasks_keyboard, get_main_keyboard, get_edit_fields_keyboard, get_priority_keyboard, get_completed_tasks_keyboard
 from datetime import datetime
+from datetime import time as dt_time
+from utils.notes import update_note
 
 # States for description-related conversations
 DESC_QUERY, EDIT_SELECT, EDIT_TEXT = range(3)
@@ -22,8 +24,14 @@ def format_task(task):
     deadline_text = ""
     if task['deadline']:
         try:
+            # parse ISO datetime or date
             deadline = datetime.fromisoformat(task['deadline'].replace('Z', '+00:00'))
-            deadline_text = f" | ⏰ {deadline.strftime('%d.%m.%Y')}"
+            date_part = deadline.strftime('%d.%m.%Y')
+            # include time if it's not midnight
+            time_part = ''
+            if deadline.time() != dt_time(0, 0):
+                time_part = f" {deadline.strftime('%H:%M')}"
+            deadline_text = f" | ⏰ {date_part}{time_part}"
         except:
             deadline_text = " | ⏰ Неверная дата"
     
@@ -121,15 +129,12 @@ async def handle_task_completion(update: Update, context: ContextTypes.DEFAULT_T
     success = db.mark_task_done(task_id, user_id)
     
     if success:
-        await query.edit_message_text(
-            "✅ Задача отмечена как выполненная!",
-            reply_markup=get_main_keyboard()
-        )
+        # edit the inline message (no ReplyKeyboardMarkup allowed here)
+        await query.edit_message_text("✅ Задача отмечена как выполненная!")
+        await query.message.reply_text("✅ Задача отмечена как выполненная!", reply_markup=get_main_keyboard())
     else:
-        await query.edit_message_text(
-            "❌ Ошибка при обновлении задачи",
-            reply_markup=get_main_keyboard()
-        )
+        await query.edit_message_text("❌ Ошибка при обновлении задачи")
+        await query.message.reply_text("❌ Ошибка при обновлении задачи", reply_markup=get_main_keyboard())
 
 
 async def start_show_description_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -340,7 +345,7 @@ async def receive_field_choice(update: Update, context: ContextTypes.DEFAULT_TYP
 
     # For mark done handle immediately
     if choice == 'Отметить выполненной':
-        success = db.update_task(task_id, update.effective_user.id, {'is_done': True})
+        success = update_note(task_id, update.effective_user.id, {'is_done': True})
         if success:
             await update.message.reply_text("✅ Задача отмечена как выполненная.", reply_markup=get_main_keyboard())
         else:
@@ -390,7 +395,7 @@ async def receive_new_field_value_general(update: Update, context: ContextTypes.
     else:
         val = new_value
 
-    success = db.update_task(task_id, user_id, {field: val})
+    success = update_note(task_id, user_id, {field: val})
     context.user_data.pop('field_to_edit', None)
 
     if success:
@@ -455,12 +460,10 @@ async def handle_task_restore(update: Update, context: ContextTypes.DEFAULT_TYPE
     success = db.restore_task(task_id, user_id)
 
     if success:
-        await query.edit_message_text(
-            "✅ Задача успешно восстановлена!",
-            reply_markup=get_main_keyboard()
-        )
+        # edit the inline message (no ReplyKeyboardMarkup allowed here)
+        await query.edit_message_text("✅ Задача успешно восстановлена!")
+        # send a new message with the main (reply) keyboard
+        await query.message.reply_text("✅ Задача успешно восстановлена!", reply_markup=get_main_keyboard())
     else:
-        await query.edit_message_text(
-            "❌ Ошибка при восстановлении задачи",
-            reply_markup=get_main_keyboard()
-        )
+        await query.edit_message_text("❌ Ошибка при восстановлении задачи")
+        await query.message.reply_text("❌ Ошибка при восстановлении задачи", reply_markup=get_main_keyboard())
