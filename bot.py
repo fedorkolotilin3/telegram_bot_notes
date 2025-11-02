@@ -90,7 +90,10 @@ class TaskManagerBot:
             self.setup_handlers()
             
             # Настройка планировщика уведомлений
-            self.scheduler = NotificationScheduler(self.application)
+            # Передаём токен, но не сам объект Application — это предотвращает
+            # попытки создания weakref к экземпляру Application в сторонних
+            # библиотеках (это вызывало ошибку на облачном хостинге).
+            self.scheduler = NotificationScheduler(Config.TELEGRAM_BOT_TOKEN)
             self.scheduler.start_scheduler()
             
             # Настройка обработчиков сигналов

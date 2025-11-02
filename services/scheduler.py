@@ -2,16 +2,21 @@ import asyncio
 import logging
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
-from telegram.ext import Application
+from telegram import Bot
 from database.supabase_client import db
 from datetime import datetime, timedelta
 import pytz
+from config import Config
 
 logger = logging.getLogger(__name__)
 
 class NotificationScheduler:
-    def __init__(self, application: Application):
-        self.application = application
+    def __init__(self, token: str | None = None):
+        # Do not hold a reference to the full Application instance here.
+        # Create a Bot instance using the token so APScheduler won't try to
+        # create weak references to the Application object.
+        bot_token = token or Config.TELEGRAM_BOT_TOKEN
+        self.bot = Bot(bot_token)
         self.scheduler = BackgroundScheduler()
         self.timezone = pytz.timezone('Europe/Moscow')
         
@@ -64,7 +69,8 @@ class NotificationScheduler:
             message = self._format_notification_message(time_of_day, important_tasks, urgent_tasks)
             
             # Отправляем сообщение
-            await self.application.bot.send_message(
+            # Use the Bot instance we created instead of Application.bot
+            await self.bot.send_message(
                 chat_id=user_id,
                 text=message,
                 parse_mode='Markdown'
