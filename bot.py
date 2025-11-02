@@ -4,18 +4,18 @@ import sys
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, CallbackQueryHandler
 from config import Config
 from handlers.start import start_command, help_command
-from handlers.tasks import (
-    show_my_tasks, 
-    show_important_tasks, 
-    show_urgent_tasks, 
+from handlers.actions import (
+    show_my_tasks,
+    show_important_tasks,
+    show_urgent_tasks,
     show_tasks_for_completion,
-    handle_task_completion
+    handle_task_completion,
+    show_completed_tasks,
+    handle_task_restore
 )
-from handlers.tasks import show_completed_tasks, handle_task_restore
-from handlers.conversation import get_conversation_handler
 from utils.keyboards import get_main_keyboard
 from services.scheduler import NotificationScheduler, scheduler_instance
-from handlers.tasks import get_description_conversation, get_edit_description_conversation, get_general_edit_conversation
+from handlers.tasks import get_general_edit_conversation, get_conversation_handler, get_description_conversation
 
 # Настройка логирования
 logging.basicConfig(
@@ -42,8 +42,6 @@ class TaskManagerBot:
         self.application.add_handler(get_description_conversation())
         # general edit (replaces separate edit-description option)
         self.application.add_handler(get_general_edit_conversation())
-        # keep legacy edit-description handler for backward compatibility
-        self.application.add_handler(get_edit_description_conversation())
         
         # Регистрация обработчиков сообщений (кнопки меню)
         self.application.add_handler(MessageHandler(filters.Regex('^(📋 Мои задачи)$'), show_my_tasks))

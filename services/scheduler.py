@@ -150,7 +150,7 @@ class NotificationScheduler:
             # Утреннее уведомление (8:00) - используем обертку для асинхронной функции
             self.scheduler.add_job(
                 self._run_async_job,
-                trigger=CronTrigger(hour=8, minute=0, timezone=self.timezone),
+                trigger=CronTrigger(hour=9, minute=0, timezone=self.timezone),
                 args=['morning'],
                 id='morning_notification'
             )
@@ -158,7 +158,7 @@ class NotificationScheduler:
             # Дневное уведомление (13:00)
             self.scheduler.add_job(
                 self._run_async_job,
-                trigger=CronTrigger(hour=13, minute=0, timezone=self.timezone),
+                trigger=CronTrigger(hour=14, minute=0, timezone=self.timezone),
                 args=['afternoon'],
                 id='afternoon_notification'
             )
@@ -166,7 +166,7 @@ class NotificationScheduler:
             # Вечернее уведомление (20:00)
             self.scheduler.add_job(
                 self._run_async_job,
-                trigger=CronTrigger(hour=22, minute=21, timezone=self.timezone),
+                trigger=CronTrigger(hour=22, minute=30, timezone=self.timezone),
                 args=['evening'],
                 id='evening_notification'
             )

@@ -31,9 +31,8 @@ def get_skip_or_cancel_keyboard():
 
 
 def get_deadline_quick_keyboard():
-    """Клавиатура для быстрого выбора дедлайна"""
+    """Клавиатура для быстрого выбора дедлайна: только выбор даты (календарь) и пропустить"""
     keyboard = [
-        ['Сегодня', 'Завтра', 'Через 3 дня'],
         ['Выбрать дату', 'Пропустить'],
         ['Отмена']
     ]
@@ -86,3 +85,13 @@ def get_completed_tasks_keyboard(tasks):
             )
         ])
     return InlineKeyboardMarkup(keyboard)
+
+# new keyboard used when editing an existing task that already has a deadline
+def get_deadline_edit_keyboard():
+	"""Клавиатура при редактировании дедлайна у существующей задачи"""
+	keyboard = [
+		['Изменить дату', 'Изменить время'],
+		['Удалить дедлайн'],
+		['Отмена']
+	]
+	return ReplyKeyboardMarkup(keyboard, resize_keyboard=True, one_time_keyboard=True)
